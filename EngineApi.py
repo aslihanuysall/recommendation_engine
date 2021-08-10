@@ -3,6 +3,7 @@ from flask_restful import Resource, Api, reqparse
 import json
 import ast
 
+
 class RecoApi(Resource):
 
     def __init__(self):
@@ -10,41 +11,113 @@ class RecoApi(Resource):
         self.api = Api(self.app)
         self.api.add_resource(RecoApi, '/recommended_products')
 
-# methods
+    # methods
     def get(self):
         parser = reqparse.RequestParser()
-        parser.add_argument('productid', required=True)
         parser.add_argument('reco_strategy', required=True)
-        parser.add_argument('categoryid', required=False)
-        parser.add_argument('subcategoryid', required=False)
+        parser.add_argument('productid', required=True)
+        parser.add_argument('category', required=False)
+        parser.add_argument('subcategory', required=False)
 
         args = parser.parse_args()
-        recommendations = json.load(open("recommendations/item-item-collaborative-filtering.json"))
-        #categories = json.load(open("data/product-categories.json"))
+        reco_strategy = args["reco_strategy"]
+        print("reco_strategy :{}".format(reco_strategy))
+        productid = args["productid"]
+        print("productid :{}".format(productid))
+        category = args["category"]
+        print("category :{}".format(category))
+        subcategory = args["subcategory"]
+        print("subcategory :{}".format(subcategory))
 
-        return recommendations[args["productid"]]
-        #if args['productid'] in list(recommendations.keys()):
-        #    if
-#
-        #    return {
-        #               'message': f"'{args['userId']}' already exists."
-        #           }, 409
-        #else:
-        #    print()
-        #return {'data': data}, 200  # return data and 200 OK code
+        valid_reco_strategies = ["item-collaborative-filtering", "recently_purchased_together",
+                                 "most_purchased_in_category", "most_purchased_in_subcategory"]
+
+        collaborative_filtering_recos_dict = json.load(open("recommendations/item-collaborative-filtering.json"))
+        recently_purchased_together_recos_dict = json.load(open("recommendations/recently_purchased_together.json"))
+        most_purchased_in_category_recos_dict = json.load(open("recommendations/most_purchased_in_category.json"))
+        most_purchased_in_subcategory_recos_dict = json.load(open("recommendations/most_purchased_in_subcategory.json"))
+
+        product_info_dict = json.load(open("data/product_info.json"))
+        product_categories_dict = json.load(open("data/product_categories_dict.json"))
+        product_subcategories_dict = json.load(open("data/product_subcategories_dict.json"))
+
+        if (reco_strategy in valid_reco_strategies) and (productid in product_info_dict.keys()):
+            if reco_strategy == "item-collaborative-filtering":
+                if category or subcategory:
+                    return {
+                               'message': f"please do not pass category or subcategory when using "
+                                          f"item-collaborative-filtering"
+                           }, 404
+                elif productid not in collaborative_filtering_recos_dict.keys():
+                    return {
+                               'message': f"item-collaborative-filtering could not found for item {productid}"
+                           }, 404
+                else:
+                    return {productid: collaborative_filtering_recos_dict[productid]}, 200
+
+            elif reco_strategy == "recently_purchased_together":
+
+                if category or subcategory:
+                    return {
+                               'message': f"please do not pass category or subcategory when using "
+                                          f"recently_purchased_together"
+                           }, 404
+                elif productid not in recently_purchased_together_recos_dict.keys():
+                    return {
+                               'message': f"recently_purchased_together_recos_dict could not found for item {productid}"
+                           }, 404
+                else:
+                    return {productid: recently_purchased_together_recos_dict[productid]}, 200
+
+            elif reco_strategy == "most_bought_in_category":
+
+                if category and subcategory:
+                    return {
+                               'message': f"please pass category or subcategory(not both of them) when using "
+                                          f"most_bought_in_category strategy"
+                           }, 404
+                else:
+                    if category and (category in product_categories_dict.keys()):
+
+                        return {productid: most_purchased_in_subcategory_recos_dict[category][productid]}, 200
+
+                    elif subcategory and (subcategory in product_categories_dict.keys()):
+
+                        return {productid: most_purchased_in_subcategory_recos_dict[subcategory][productid]}, 200
+
+                    else:
+                        return {
+                                'message': f"please pass valid category or subcategory when using "
+                                           f"most_bought_in_category strategy"
+                                }, 404
+
+            elif reco_strategy == "most_bought_in_subcategory":
+
+                if category and subcategory:
+                    return {
+                           'message': f"please pass category or subcategory(not both of them) when using "
+                                      f"most_bought_in_category strategy"
+                        }, 404
+                else:
+                    if category and (category in product_categories_dict.keys()):
+
+                        return {productid: most_purchased_in_subcategory_recos_dict[category][productid]}, 200
+
+                    elif subcategory and (subcategory in product_categories_dict.keys()):
+
+                        return {productid: most_purchased_in_subcategory_recos_dict[subcategory][productid]}, 200
+
+                    else:
+                        return {
+                                'message': f"please pass valid category or subcategory when using "
+                                           f"most_bought_in_category strategy"
+                                }, 404
+
+        else:
+            return {
+               'message': "please pass valid reco_strategy and productid"
+            }, 404
 
 
     def run(self):
         self.app.run()
-
-    #def get_last_purchased_reco(self):
-
-
-    #def get_bought_together_reco(self):
-
-
-    #def get_most_bought_in_category(self):
-
-    #def get_most_bought_in_subcategory(self):
-#reco_api.app.run()
-

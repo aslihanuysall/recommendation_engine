@@ -15,10 +15,16 @@ class Recommendation:
         self.event_product_df = self.events_df.merge(self.meta_df, on="productid", how="left")
 
         self.product_categories_df = self.meta_df.groupby("category")["productid"].apply(list)
+        self.product_subcategories_df = self.meta_df.groupby("subcategory")["productid"].apply(list)
+
         self.product_categories_dict = self.product_categories_df.to_dict()
+        self.product_subcategories_dict = self.product_subcategories_df.to_dict()
 
         with open("data/product_categories.json", "w") as file:
             json.dump(self.product_categories_dict, file)
+
+        with open("data/product_subcategories.json", "w") as file:
+            json.dump(self.product_subcategories_dict, file)
 
         self.product_info_dict = {d['productid']: {"name": d['name'],
                                                    "category": d['category'],
@@ -28,7 +34,7 @@ class Recommendation:
         with open("data/product_info.json", "w") as file:
             json.dump(self.product_info_dict, file)
 
-    def get_item_collaborative_filter_reco(self):
+    def get_item_collaborative_filtering_reco(self):
         purchased_df = pd.pivot_table(self.events_df, index='sessionid', columns='productid', values='event',
                                       aggfunc='count')
         purchased_df.reset_index(inplace=True)
@@ -44,8 +50,7 @@ class Recommendation:
 
         # Take top five scoring recs that aren't the original product
         product_recs_dict = {}
-        # for i in cos_score_df.index:
-        for product in ["HBV00000GYMOJ", "HBV00000PV7NK", "HBV00000PV8KX"]:
+        for product in cos_score_df.index:
             reco = cos_score_df[cos_score_df.index != product][product].sort_values(ascending=False)[0:10]
             product_recs_dict[reco.name] = reco.to_dict()
 
@@ -57,8 +62,8 @@ class Recommendation:
 
         self.events_df["eventtime"] = self.events_df["eventtime"].apply(
             lambda x: dt.strptime(x[:-5], "%Y-%m-%dT%H:%M:%S"))
-        one_month_ago = max(self.events_df["eventtime"]) - relativedelta(months=1)
-        last_one_month_events_df = self.events_df[self.events_df["eventtime"] >= one_month_ago]
+        three_months_ago = max(self.events_df["eventtime"]) - relativedelta(months=2)
+        last_one_month_events_df = self.events_df[self.events_df["eventtime"] >= three_months_ago]
 
         purchased_df = pd.pivot_table(last_one_month_events_df, index='sessionid', columns='productid', values='event',
                                       aggfunc='count')
@@ -69,15 +74,18 @@ class Recommendation:
         purchased_together_df = purchased_df.T.dot(purchased_df)
         np.fill_diagonal(purchased_together_df.values, 0)
 
-        for product in ["HBV00000GYMOJ", "HBV00000PV7NK", "HBV00000PV8KX"]:
+        x=1
+        for product in purchased_together_df.index:
+            print(x)
             reco = purchased_together_df[purchased_together_df.index != product][product].sort_values(
-                ascending=False)
+                ascending=False)[0:10]
             product_recs_dict[reco.name] = reco.to_dict()
+            x+=1
 
         with open("recommendations/recently_purchased_together.json", 'w') as file:
             json.dump(product_recs_dict, file)
 
-    def get_most_bought_in_category(self):
+    def get_most_purchased_in_category(self):
         category_product_recs_dict = {}
         for category in self.product_categories_dict.keys():
             category_product_recs_dict[category] = {}
@@ -92,18 +100,19 @@ class Recommendation:
             np.fill_diagonal(purchased_together_df.values, 0)
 
             product_rec_dict = {}
-            for product in ["HBV00000GYMOJ", "HBV00000PV7NK", "HBV00000PV8KX"]:
-                reco = purchased_df[purchased_df.index != product][product].sort_values(ascending=False)[0:10]
+            for product in purchased_together_df.index:
+                reco = purchased_together_df[purchased_together_df.index != product][product].sort_values(
+                    ascending=False)[0:10]
                 product_rec_dict[reco.name] = reco.to_dict()
 
-            category_product_recs_dict[category] = product_rec_dict[reco.name]
+            category_product_recs_dict[category] = product_rec_dict
 
-        with open("recommendations/most_bought_in_category.json", 'w') as file:
+        with open("recommendations/most_purchased_in_category.json", 'w') as file:
             json.dump(category_product_recs_dict, file)
 
-    def get_most_bought_in_subcategory(self):
+    def get_most_purchased_in_subcategory(self):
         subcategory_product_recs_dict = {}
-        for subcategory in self.product_categories_dict.keys():
+        for subcategory in self.product_subcategories_dict.keys():
             subcategory_product_recs_dict[subcategory] = {}
             subcategory_sales_df = self.event_product_df[self.event_product_df["subcategory"] == subcategory]
             purchased_df = pd.pivot_table(subcategory_sales_df, index='sessionid', columns='productid', values='event',
@@ -116,11 +125,12 @@ class Recommendation:
             np.fill_diagonal(purchased_together_df.values, 0)
 
             product_rec_dict = {}
-            for product in ["HBV00000GYMOJ", "HBV00000PV7NK", "HBV00000PV8KX"]:
-                reco = purchased_df[purchased_df.index != product][product].sort_values(ascending=False)[0:10]
+            for product in purchased_together_df.index:
+                reco = purchased_together_df[purchased_together_df.index != product][product].sort_values(
+                    ascending=False)[0:10]
                 product_rec_dict[reco.name] = reco.to_dict()
 
-            subcategory_product_recs_dict[subcategory] = product_rec_dict[reco.name]
+            subcategory_product_recs_dict[subcategory] = product_rec_dict
 
-        with open("recommendations/most_bought_in_subcategory.json", 'w') as file:
+        with open("recommendations/most_purchased_in_subcategory.json", 'w') as file:
             json.dump(subcategory_product_recs_dict, file)
