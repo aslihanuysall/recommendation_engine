@@ -96,37 +96,52 @@ http://127.0.0.1:5000/recommended_products?reco_strategy=item-collaborative-filt
 ```
 
 Recently Purchased Together Example
-http://127.0.0.1:5000/recommended_products?reco_strategy=recently_purchased_together&productid=HBV00000GYMOJ
-
+http://127.0.0.1:5000/recommended_products?reco_strategy=recently_purchased_together&productid=AILEBIZIZSMTLDGY54
 ```json
 {
-  "productid": "HBV00000GYMOJ",
-  "reco_strategy": "recently_purchased_together"
+  "AILEBIZIZSMTLDGY54": {
+    "HBV00000PV7O3": 9.0,
+    "AILEBIZIZSMTLDHB18": 6.0,
+    "AILEMTTDMT57": 6.0,
+    "HBV00000QU6GQ": 6.0,
+    "HBV00000PVBJY": 6.0,
+    "HBV00000PV5VU": 6.0,
+    "HBV00000GYMOJ": 6.0,
+    "HBV00000PV8BL": 5.0,
+    "OYUNMTTW2087": 5.0,
+    "HBV00000NGXFE": 5.0
+  }
 }
 ```
 
 Most Purchased In Same Category Example
-http://127.0.0.1:5000/recommended_products?reco_strategy=most_purchased_in_category&productid=HBV00000GYMOJ&category=
-
+http://127.0.0.1:5000/recommended_products?reco_strategy=most_purchased_in_category&productid=HBV000003GPSJ&category=Atıştırmalık
 ```json
 {
-  "productid": "HBV00000GYMOJ",
-  "reco_strategy": "most_purchased_in_category",
-  "category": "",
-  OR
-  "subcategory": ""
+  "HBV000003GPSJ": {
+    "HBV00000JUHLM": 7.0,
+    "ZYHPETICEBSK107": 5.0,
+    "HBV0000054IPN": 5.0,
+    "ZYHPETICEBSK080": 5.0,
+    "HBV00000QU4CI": 4.0,
+    "HBV00000QU4BW": 3.0,
+    "HBV00000JBL0D": 3.0,
+    "HBV00000PVCRI": 3.0,
+    "HBV00000JUHL6": 3.0,
+    "HBV00000NE1VV": 3.0
+  }
 }
 ```
 
 Most Purchased In Same SubCategory Example
-http://127.0.0.1:5000/recommended_products?reco_strategy=most_purchased_in_subcategory&productid=HBV00000GYMOJ&subcategory=
-
+http://127.0.0.1:5000/recommended_products?reco_strategy=most_purchased_in_subcategory&productid=HBV00000PVQKS&subcategory=Alt Açma Seti
 ```json
 {
-  "productid": "HBV00000GYMOJ",
-  "reco_strategy": "most_purchased_in_subcategory",
-  "category": "",
-  OR
-  "subcategory": ""
+  "HBV00000PVQKS": {
+    "HBV00000PVR10": 0.0,
+    "ZYCANN63125": 0.0,
+    "ZYECZACI9470301": 0.0,
+    "ZYHAYAT803989": 0.0
+  }
 }
 ```

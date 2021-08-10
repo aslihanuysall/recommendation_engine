@@ -74,13 +74,10 @@ class Recommendation:
         purchased_together_df = purchased_df.T.dot(purchased_df)
         np.fill_diagonal(purchased_together_df.values, 0)
 
-        x=1
         for product in purchased_together_df.index:
-            print(x)
             reco = purchased_together_df[purchased_together_df.index != product][product].sort_values(
                 ascending=False)[0:10]
             product_recs_dict[reco.name] = reco.to_dict()
-            x+=1
 
         with open("recommendations/recently_purchased_together.json", 'w') as file:
             json.dump(product_recs_dict, file)
@@ -108,7 +105,7 @@ class Recommendation:
             category_product_recs_dict[category] = product_rec_dict
 
         with open("recommendations/most_purchased_in_category.json", 'w') as file:
-            json.dump(category_product_recs_dict, file)
+            json.dump(category_product_recs_dict, file, ensure_ascii=False)
 
     def get_most_purchased_in_subcategory(self):
         subcategory_product_recs_dict = {}
@@ -133,4 +130,4 @@ class Recommendation:
             subcategory_product_recs_dict[subcategory] = product_rec_dict
 
         with open("recommendations/most_purchased_in_subcategory.json", 'w') as file:
-            json.dump(subcategory_product_recs_dict, file)
+            json.dump(subcategory_product_recs_dict, file, ensure_ascii=False)

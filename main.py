@@ -2,7 +2,7 @@ from EngineApi import RecoApi
 from Recommendation import Recommendation
 
 if __name__ == "__main__":
-    rec = Recommendation()
+    #rec = Recommendation()
     #rec.get_item_collaborative_filtering_reco()
     #rec.get_recently_purchased_together_reco()
     #rec.get_most_purchased_in_category()

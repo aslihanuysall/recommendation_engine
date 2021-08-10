@@ -38,8 +38,8 @@ class RecoApi(Resource):
         most_purchased_in_subcategory_recos_dict = json.load(open("recommendations/most_purchased_in_subcategory.json"))
 
         product_info_dict = json.load(open("data/product_info.json"))
-        product_categories_dict = json.load(open("data/product_categories_dict.json"))
-        product_subcategories_dict = json.load(open("data/product_subcategories_dict.json"))
+        product_categories_dict = json.load(open("data/product_categories.json"))
+        product_subcategories_dict = json.load(open("data/product_subcategories.json"))
 
         if (reco_strategy in valid_reco_strategies) and (productid in product_info_dict.keys()):
             if reco_strategy == "item-collaborative-filtering":
@@ -69,49 +69,44 @@ class RecoApi(Resource):
                 else:
                     return {productid: recently_purchased_together_recos_dict[productid]}, 200
 
-            elif reco_strategy == "most_bought_in_category":
+            elif reco_strategy == "most_purchased_in_category":
 
-                if category and subcategory:
-                    return {
-                               'message': f"please pass category or subcategory(not both of them) when using "
+                if category and not subcategory:
+                    if category not in most_purchased_in_category_recos_dict.keys():
+                        return {
+                               'message': f"please pass a valid category when using "
                                           f"most_bought_in_category strategy"
                            }, 404
+
+                    elif category:
+                        return {productid: most_purchased_in_category_recos_dict[category][productid]}, 200
+
                 else:
-                    if category and (category in product_categories_dict.keys()):
+                    return  {
 
-                        return {productid: most_purchased_in_subcategory_recos_dict[category][productid]}, 200
+                                'message': f"please pass category or subcategory(not both of them) when using "
+                                           f"most_bought_in_category strategy"
+                            }, 404
 
-                    elif subcategory and (subcategory in product_categories_dict.keys()):
 
+            elif reco_strategy == "most_purchased_in_subcategory":
+
+                if subcategory and not category:
+                    if subcategory not in most_purchased_in_subcategory_recos_dict.keys():
+                        return {
+                                   'message': f"please pass a valid subcategory when using "
+                                              f"most_bought_in_category strategy"
+                               }, 404
+
+                    elif subcategory:
                         return {productid: most_purchased_in_subcategory_recos_dict[subcategory][productid]}, 200
 
-                    else:
-                        return {
-                                'message': f"please pass valid category or subcategory when using "
-                                           f"most_bought_in_category strategy"
-                                }, 404
-
-            elif reco_strategy == "most_bought_in_subcategory":
-
-                if category and subcategory:
-                    return {
-                           'message': f"please pass category or subcategory(not both of them) when using "
-                                      f"most_bought_in_category strategy"
-                        }, 404
                 else:
-                    if category and (category in product_categories_dict.keys()):
+                    return  {
 
-                        return {productid: most_purchased_in_subcategory_recos_dict[category][productid]}, 200
-
-                    elif subcategory and (subcategory in product_categories_dict.keys()):
-
-                        return {productid: most_purchased_in_subcategory_recos_dict[subcategory][productid]}, 200
-
-                    else:
-                        return {
-                                'message': f"please pass valid category or subcategory when using "
+                                'message': f"please pass category or subcategory(not both of them) when using "
                                            f"most_bought_in_category strategy"
-                                }, 404
+                            }, 404
 
         else:
             return {
