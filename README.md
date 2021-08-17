@@ -2,7 +2,7 @@
 
 -Before using this repository, required packages needs to be installed;
 -Easiest way to install packagess into a python virtual environment;
--python -m pip install -r requirements.txt 
+-python -m pip install -r recommendation-engine-env.txt 
 
 There are different strategies for suggesting related products:
 
